@@ -1,0 +1,7 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "python.analysis.extraPaths": [
+    "./backend"
+  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/Scripts/python.exe"
+}
