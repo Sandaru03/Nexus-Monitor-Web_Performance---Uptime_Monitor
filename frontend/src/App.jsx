@@ -10,6 +10,7 @@ function App() {
   const [sites, setSites] = useState([]);
   const [selectedSite, setSelectedSite] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [newSite, setNewSite] = useState('');
 
   const fetchStatus = async () => {
     try {
@@ -19,6 +20,22 @@ function App() {
       console.error("Error fetching status", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddSite = async () => {
+    if (!newSite.trim() || !newSite.startsWith('http')) {
+      alert("Please enter a valid URL starting with http:// or https://");
+      return;
+    }
+    try {
+      await axios.post(`${API_BASE}/targets`, { url: newSite });
+      setNewSite('');
+      // Wait a short moment to allow the backend to do the initial ping
+      setTimeout(() => fetchStatus(), 1500);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to add site");
     }
   };
 
@@ -32,6 +49,17 @@ function App() {
     total: sites.length,
     down: sites.filter(s => s.status !== 'UP').length,
     sslWarnings: sites.filter(s => s.ssl_days_left > 0 && s.ssl_days_left <= 7).length,
+  };
+
+  const handleDeleteSite = async (url) => {
+    if (!window.confirm(`Are you sure you want to remove ${url}?`)) return;
+    try {
+      await axios.delete(`${API_BASE}/targets/${encodeURIComponent(url)}`);
+      setSites(sites.filter(s => s.url !== url));
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete site");
+    }
   };
 
   return (
@@ -79,6 +107,24 @@ function App() {
         </div>
       </header>
 
+      {/* Add New Site */}
+      <div className="glass-panel p-4 flex gap-4 items-center">
+        <input 
+          type="text" 
+          placeholder="https://example.com" 
+          className="flex-1 bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+          value={newSite}
+          onChange={(e) => setNewSite(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleAddSite()}
+        />
+        <button 
+          onClick={handleAddSite}
+          className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+        >
+          Add Site
+        </button>
+      </div>
+
       {/* Main Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -91,6 +137,7 @@ function App() {
               key={site.id} 
               site={site} 
               onSelect={() => setSelectedSite(site.url)} 
+              onDelete={() => handleDeleteSite(site.url)}
             />
           ))}
         </div>

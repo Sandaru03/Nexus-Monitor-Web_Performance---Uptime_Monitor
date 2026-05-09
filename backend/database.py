@@ -90,3 +90,23 @@ def get_targets() -> List[str]:
     rows = cursor.fetchall()
     conn.close()
     return [row[0] for row in rows]
+
+def add_target(url: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    try:
+        cursor.execute('INSERT INTO targets (url) VALUES (?)', (url,))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass # Already exists
+    finally:
+        conn.close()
+
+def remove_target(url: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM targets WHERE url = ?', (url,))
+    cursor.execute('DELETE FROM site_logs WHERE url = ?', (url,))
+    conn.commit()
+    conn.close()
+

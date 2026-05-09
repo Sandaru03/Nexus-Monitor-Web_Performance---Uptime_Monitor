@@ -1,17 +1,25 @@
 import React from 'react';
-import { Clock, Globe, Shield, TrendingUp } from 'lucide-react';
+import { Clock, Globe, Shield, TrendingUp, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-const SiteCard = ({ site, onSelect }) => {
+const SiteCard = ({ site, onSelect, onDelete }) => {
   const isUp = site.status === 'UP';
   const sslWarning = site.ssl_days_left !== -1 && site.ssl_days_left <= 7;
 
   return (
     <div 
-      className="glass-panel p-6 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer group hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]"
+      className="glass-panel p-6 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer group hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] relative"
       onClick={onSelect}
     >
-      <div className="flex justify-between items-start mb-6">
+      <button 
+        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        className="absolute top-2 right-2 p-2 text-slate-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Remove site"
+      >
+        <Trash2 size={16} />
+      </button>
+
+      <div className="flex justify-between items-start mb-6 pr-8">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className={`p-2 rounded-full flex-shrink-0 ${isUp ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
             <Globe size={20} />
